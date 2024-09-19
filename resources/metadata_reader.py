@@ -110,7 +110,7 @@ def get_filename_from_id(id):
 
 if __name__ == "__main__":
     # Path to the directory containing the images
-    directory_path = "D:/data/image_data"
+    directory_path = "D:/Pixelio Projekt/dataset"
     img_gen = ImageGenerator(directory_path).image_generator()
 
     create_database()  # Ensure that the database and table exist
