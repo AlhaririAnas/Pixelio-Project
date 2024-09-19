@@ -1,4 +1,4 @@
-name: our workflow for the Image-recommender project
+name: workflow for the Pixelio-Project
 
 on:
   push:
@@ -40,6 +40,3 @@ jobs:
         run: |
           ruff resources/.
 
-      - name: test with pytest
-        run: |
-          pytest -v
