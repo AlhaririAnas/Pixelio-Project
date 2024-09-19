@@ -16,7 +16,7 @@ namespaces = false  # to disable scanning PEP 420 namespaces (true by default)
 authors = [
 
     { name = "Anas Alhariri", email = "anas.alhariri@study.hs-duesseldorf.de" },
-    { name = "Jonah Gräfe", email = "jonah.graefe@study.hs-duesseldorf.de" }
+    { name = "Joschua Schramm", email = "joschua.schramm@study.hs-duesseldorf.de" }
 ]
 
 classifiers = [
