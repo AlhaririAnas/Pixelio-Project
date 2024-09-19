@@ -33,7 +33,6 @@ classifiers = [
 ]
 dependencies = [
     "ruff == 0.1.7",
-    "pytest", 
     "numpy==1.26.1",
     "pandas==2.2.0",
     "torch",
@@ -60,7 +59,6 @@ dev = [
     "black",
     "flake8",
     "isort",
-    "pytest",
     "pytest-cov",
     "ruff",
 ]
