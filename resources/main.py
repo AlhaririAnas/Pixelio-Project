@@ -115,7 +115,6 @@ def create_and_save_clustering_model(vectors, vector_ids, filename, clusters):
     print(f"Clustering model saved to {filename}")
 
 
-
 def load_pkl_files():
     """
     A function to load pickle files containing similarities and embedding clusters.
