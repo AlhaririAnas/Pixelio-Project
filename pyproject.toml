@@ -16,6 +16,7 @@ namespaces = false  # to disable scanning PEP 420 namespaces (true by default)
 authors = [
 
     { name = "Anas Alhariri", email = "anas.alhariri@study.hs-duesseldorf.de" },
+    { name = "Jonah Gräfe", email = "jonah.graefe@study.hs-duesseldorf.de" },
     { name = "Joschua Schramm", email = "joschua.schramm@study.hs-duesseldorf.de" }
 ]
 
@@ -33,6 +34,7 @@ classifiers = [
 ]
 dependencies = [
     "ruff == 0.1.7",
+    "pytest", 
     "numpy==1.26.1",
     "pandas==2.2.0",
     "torch",
@@ -47,9 +49,9 @@ dependencies = [
     "waitress",
 ]
 
-description = "A package implementing the Image-recommender"
+description = "A package implementing the Pixelio-Project"
 license = {file = "LICENSE"}
-name = "image-recommender"
+name = "Pixelio-Project"
 readme = {file = "README.md", content-type = "text/markdown"}
 requires-python = ">=3.8"
 version = "0.1.0"
@@ -59,6 +61,7 @@ dev = [
     "black",
     "flake8",
     "isort",
+    "pytest",
     "pytest-cov",
     "ruff",
 ]
@@ -81,7 +84,7 @@ exclude = '''
 profile = "black"
 known_first_party = "Pixelio_Project"
 packages = ["python_Pixelio_Project"]
-src_paths = ["Pixelio-Project"]
+src_paths = ["Pixelio-Project", "tests"]
 line_length = "100"
 
 [tool.pylint]  # If you opt to use pylint
