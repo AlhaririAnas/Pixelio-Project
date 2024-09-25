@@ -19,24 +19,37 @@ if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
 
-def process_images(image_paths, args, distance_measure):
+def process_images(image_paths, args, similarity_measures, distance_measure):
     start_time = time.time()
     conn = sqlite3.connect("image_metadata.db")
+    color_based = []
     embedding_based = []
+    yolo_based = []
 
-    embedding_most_similar = get_most_similar(
+    color_most_similar, embedding_most_similar, yolo_most_similar = get_most_similar(
         image_paths,
         args,
+        similarity_measures,
         distance_measure,
         app.config["SIMILARITIES"],
+        app.config["COLOR_CLUSTER"],
         app.config["EMBEDDING_CLUSTER"],
     )
+
+    for id in color_most_similar:
+        query = f"SELECT filename FROM metadata WHERE id = {id}"
+        print(os.path.join(args.path, conn.execute(query).fetchall()[0][0]))
+        color_based.append(os.path.join(args.path, conn.execute(query).fetchall()[0][0]))
 
     for id in embedding_most_similar:
         query = f"SELECT filename FROM metadata WHERE id = {id}"
         embedding_based.append(os.path.join(args.path, conn.execute(query).fetchall()[0][0]))
 
-    for path in embedding_based:
+    for id in yolo_most_similar:
+        query = f"SELECT filename FROM metadata WHERE id = {id}"
+        yolo_based.append(os.path.join(args.path, conn.execute(query).fetchall()[0][0]))
+
+    for path in color_based + embedding_based + yolo_based:
         try:
             shutil.copyfile(path, os.path.join(app.config["UPLOAD_FOLDER"], os.path.basename(path)))
         except FileNotFoundError:
@@ -45,7 +58,7 @@ def process_images(image_paths, args, distance_measure):
     conn.close()
     end_time = time.time()
     processing_time = round(end_time - start_time, 3)
-    return embedding_based, processing_time
+    return color_based, embedding_based, yolo_based, processing_time
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -65,32 +78,40 @@ def upload_file():
                 file.save(file_path)
                 filenames.append(filename)  # Store the filename for URL generation
                 full_paths.append(file_path)  # Store the full path for processing
+        similarity_measures = request.form.getlist("similarity_measure")
         distance_measure = request.form.get("distance_measure")
         encoded_filenames = urllib.parse.quote(",".join(filenames))
         encoded_full_paths = urllib.parse.quote(",".join(full_paths))
+        encoded_measures = urllib.parse.quote(",".join(similarity_measures))
         return redirect(
             url_for(
                 "uploaded_files",
                 filenames=encoded_filenames,
                 full_paths=encoded_full_paths,
+                similarity_measures=encoded_measures,
                 distance_measure=distance_measure,
             )
         )
     return render_template("upload.html")
 
 
-@app.route("/uploads/<path:filenames>/<path:full_paths>/<distance_measure>")
-def uploaded_files(filenames, full_paths, distance_measure):
+@app.route("/uploads/<path:filenames>/<path:full_paths>/<similarity_measures>/<distance_measure>")
+def uploaded_files(filenames, full_paths, similarity_measures, distance_measure):
     filenames = urllib.parse.unquote(filenames).split(",")
     full_paths = urllib.parse.unquote(full_paths).split(",")
+    similarity_measures = urllib.parse.unquote(similarity_measures).split(",")
     distance_measure = urllib.parse.unquote(distance_measure)
     args = app.config.get("ARGS", {"path": UPLOAD_FOLDER})  # Use UPLOAD_FOLDER as default path
 
-    embedding_based, processing_time = process_images(full_paths, args, distance_measure)
+    color_based, embedding_based, yolo_based, processing_time = process_images(
+        full_paths, args, similarity_measures, distance_measure
+    )
 
     results = {
         "uploaded_images": filenames,
+        "color_based": color_based,
         "embedding_based": embedding_based,
+        "yolo_based": yolo_based,
         "processing_time": processing_time,
     }
 
