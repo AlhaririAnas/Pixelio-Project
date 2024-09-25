@@ -2,7 +2,7 @@
 
 ## Overview
 
-This repository houses a project that finds the top five images similar to any given photo from a large dataset of almost 500,000 images. The software utilizes Python to recommend images based on various similarity metrics such as color schemes, embeddings, and YOLO object detection.
+This repository houses a project that finds the top x images similar to any given photo from a large dataset. The software utilizes Python to recommend images based on various similarity metrics such as color schemes, embeddings, and YOLO object detection.
 
 ## Getting Started
 
