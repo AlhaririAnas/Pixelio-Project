@@ -1,4 +1,4 @@
-# Image Recommender
+# Pixelio-Project
 
 ## Overview
 
