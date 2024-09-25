@@ -49,9 +49,9 @@ dependencies = [
     "waitress",
 ]
 
-description = "A package implementing the Image-recommender"
+description = "A package implementing the Pixelio-Project"
 license = {file = "LICENSE"}
-name = "image-recommender"
+name = "Pixelio-Project"
 readme = {file = "README.md", content-type = "text/markdown"}
 requires-python = ">=3.8"
 version = "0.1.0"
@@ -82,9 +82,9 @@ exclude = '''
 
 [tool.isort]
 profile = "black"
-known_first_party = "image_recommender"
-packages = ["python_image_recommender"]
-src_paths = ["image-recommender", "tests"]
+known_first_party = "Pixelio_Project"
+packages = ["python_Pixelio_Project"]
+src_paths = ["Pixelio-Project", "tests"]
 line_length = "100"
 
 [tool.pylint]  # If you opt to use pylint
