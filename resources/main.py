@@ -1,9 +1,8 @@
 import os
 import torch
 import pickle
+import numpy as np
 from tqdm import tqdm
-from sklearn.cluster import DBSCAN, KMeans
-from sklearn.preprocessing import StandardScaler
 from collections import defaultdict
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
 from resources.generator import ImageGenerator
@@ -15,7 +14,7 @@ from resources.metadata_reader import (
     get_filename_from_id,
 )
 from resources.similarity import get_similarities
-from app.app import app, start_app
+from app.app import app, start_app, get_image_list
 
 
 parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
@@ -33,6 +32,14 @@ parser.add_argument("--pkl_file", action="store", default="similarities.pkl")
 parser.add_argument("--checkpoint", type=int, default=100)
 
 parser.add_argument("--debug", action="store_true")
+
+parser.add_argument("--total", type=int, default=10000)
+
+parser.add_argument("--embedding", action="store_true")
+
+parser.add_argument("--color", action="store_true")
+
+parser.add_argument("--yolo", action="store_true")
 
 args = parser.parse_args()
 
@@ -68,7 +75,7 @@ def run(args):
         starting_path = os.path.join(args.path, get_filename_from_id(id))
     img_gen = ImageGenerator(args.path).image_generator(starting_path=starting_path)
 
-    for img in tqdm(img_gen, total=447584, initial=id):
+    for img in tqdm(img_gen, total=args.total, initial=id):
         id += 1
         if args.metadata and last_db_id < id:
             metadata = get_metadata(img)
@@ -85,70 +92,13 @@ def run(args):
         pickle.dump(similarities, f)
 
 
-def create_and_save_clustering_model(vectors, vector_ids, filename, clusters, method="kmeans"):
-    """
-    Creates and saves a clustering model based on the input vectors.
-
-    Parameters:
-        vectors (array): The input vectors for clustering.
-        vector_ids (array): The IDs corresponding to the input vectors.
-        filename (str): The name of the file to save the clustering model.
-        clusters (int): The number of clusters to create.
-        method (str, optional): The clustering method to use, defaults to "kmeans".
-
-    Returns:
-        None
-    """
-    scaler = StandardScaler()
-    vectors_scaled = scaler.fit_transform(vectors)
-
-    if method == "dbscan":
-        model = DBSCAN(eps=0.5, min_samples=5)
-    elif method == "kmeans":
-        model = KMeans(n_clusters=clusters, random_state=0)
-    else:
-        raise ValueError("Unsupported clustering method")
-
-    model.fit(vectors_scaled)
-
-    with open(filename, "wb") as f:
-        pickle.dump({"model": model, "scaler": scaler, "vector_ids": vector_ids}, f)
-    print(f"Clustering model saved to {filename}")
-
-
 def load_pkl_files():
-    """
-    A function to load pickle files containing similarities, color clusters, and embedding clusters.
-    If the files are not found, it creates the clusters using the create_and_save_clustering_model function.
-    """
     print("Loading similarities from pickle file...")
-    try:
-        with open(args.pkl_file, "rb") as f:
-            similarities = pickle.load(f)
-            app.config["SIMILARITIES"] = similarities
-    except FileNotFoundError:
-        raise ValueError("No similarities found! Run the script with the -s flag.")
-    if not os.path.exists("color_cluster.pkl"):
-        print("No color cluster found. Creating...")
-        create_and_save_clustering_model(
-            [similarities[v][0] for v in similarities.keys()],
-            [v for v in similarities.keys()],
-            filename="color_cluster.pkl",
-            clusters=41,
-        )
-    if not os.path.exists("embedding_cluster.pkl"):
-        print("No embedding cluster found. Creating...")
-        create_and_save_clustering_model(
-            [similarities[v][1] for v in similarities.keys()],
-            [v for v in similarities.keys()],
-            filename="embedding_cluster.pkl",
-            clusters=45,
-        )
-    with open("color_cluster.pkl", "rb") as f:
-        app.config["COLOR_CLUSTER"] = pickle.load(f)
-    with open("embedding_cluster.pkl", "rb") as f:
-        app.config["EMBEDDING_CLUSTER"] = pickle.load(f)
-
+    with open(args.pkl_file, 'rb') as f:
+        sim = pickle.load(f)
+        app.config["similarities"] = sim
+        app.config["color_histograms"] = np.array([sim[key][0] for key in sim.keys()]).astype("float32")
+        app.config["embeddings"] = np.array([sim[key][1] for key in sim.keys()]).astype("float32")
     print("Done!")
 
 
@@ -156,8 +106,9 @@ if __name__ == "__main__":
     if args.metadata or args.similarity:
         run(args)
     else:
-        app.config["ARGS"] = args
+        app.config["args"] = args
         load_pkl_files()
+        get_image_list()
         if args.debug:
             app.run(debug=True)
         else:
