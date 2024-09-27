@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pixelio demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            text-align: center;
+            padding: 20px;
+            color: #333;
+            background-color: #D05423;
+            margin: 0;
+        }
+        .container {
+            display: flex;
+            flex-direction: row;
+            padding: 0;
+            margin: 0;
+        }
+        .gallery {
+            flex-grow: 1;
+            display: flex;
+            flex-wrap: wrap;
+            padding: 20px;
+            justify-content: center;
+            background-color: white;
+            margin-right: 250px; /* Give enough margin for the sidebar */
+        }
+        .gallery img {
+            width: 150px;
+            height: 150px;
+            margin: 10px;
+            cursor: pointer;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .gallery img:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+        .sidebar {
+            width: 250px;
+            background-color: #fff;
+            padding: 20px;
+            border-left: 1px solid #ccc;
+            box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+            position: fixed; /* Keep it fixed but on the right */
+            top: 0;
+            right: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        .sidebar img {
+            width: 100%;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+        .sidebar img:hover {
+            transform: scale(1.02);
+        }
+        #sidebar-title {
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 18px;
+            color: #333;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>pixelio demo</h1>
+    <div class="container">
+        <div class="gallery" id="gallery"></div>
+        <div class="sidebar hidden" id="sidebar">
+            <div id="sidebar-title">Similar Images</div>
+            <div id="similar-images"></div>
+        </div>
+    </div>
+
+    <script>
+        let offset = 0;
+        const limit = 50;
+        const gallery = document.getElementById('gallery');
+        const sidebar = document.getElementById('sidebar');
+        const similarImagesDiv = document.getElementById('similar-images');
+
+        // Initial similarity method
+        let similarityMethod = 'embedding';
+
+        // Function to load images dynamically
+        async function loadImages() {
+            try {
+                const response = await fetch(`/load_images?offset=${offset}&limit=${limit}`);
+                const images = await response.json();
+
+                images.forEach(image => {
+                    const imgElem = document.createElement('img');
+                    imgElem.src = `/static/images/${image}`;
+                    imgElem.alt = image;
+                    imgElem.addEventListener('click', () => showSimilarImages(image));
+                    gallery.appendChild(imgElem);
+                });
+
+                offset += limit;
+            } catch (error) {
+                console.error("Error loading images:", error);
+            }
+        }
+
+        // Function to load similar images in the sidebar
+        async function showSimilarImages(imageName) {
+            try {
+                const response = await fetch(`/similar_images/${imageName}?method=${similarityMethod}`);
+                const similarImages = await response.json();
+
+                similarImagesDiv.innerHTML = '';  // Clear previous images
+                similarImages.forEach(image => {
+                    const imgElem = document.createElement('img');
+                    imgElem.src = `/static/images/${image}`;
+                    imgElem.alt = image;
+                    similarImagesDiv.appendChild(imgElem);
+                });
+
+                sidebar.classList.remove('hidden');  // Show the sidebar
+            } catch (error) {
+                console.error("Error loading similar images:", error);
+            }
+        }
+
+        // Infinite scroll functionality
+        window.onscroll = function () {
+            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 50) {
+                loadImages();
+            }
+        };
+
+        // Load initial set of images when the page loads
+        window.onload = function () {
+            loadImages();
+        };
+    </script>
+</body>
+</html>

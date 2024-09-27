@@ -47,6 +47,7 @@ dependencies = [
     "scipy",
     "flask",
     "waitress",
+    "faiss-cpu",
 ]
 
 description = "A package implementing the Pixelio-Project"
