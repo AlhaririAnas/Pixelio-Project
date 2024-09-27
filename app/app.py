@@ -42,10 +42,11 @@ def get_similar_images(img_path):
             if any(item in list(vectors[2].keys()) for item in yolo_classes):
                 yolo_distance = np.mean([mean_iou(similarity, vectors[2]) for similarity in [app.config["similarities"][id][2]]])
                 yolo_distances[image_id] = yolo_distance
-        indices = [sorted(yolo_distances, key=yolo_distances.get, reverse=True)[:5]]
+        indices = [sorted(yolo_distances, key=yolo_distances.get, reverse=True)[:11]]
         indices = [[i-1 for i in indices[0]]]
-    return [app.config["images"][i] for i in indices[0] if i != id-1]
-
+    similar_images = [app.config["images"][i] for i in indices[0] if i != id-1]
+    print(similar_images)
+    return similar_images
 
 @app.route('/')
 def index():
