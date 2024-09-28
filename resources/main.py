@@ -41,6 +41,8 @@ parser.add_argument("--color", action="store_true")
 
 parser.add_argument("--yolo", action="store_true")
 
+parser.add_argument("--image_count", default=5, type=int)
+
 args = parser.parse_args()
 
 
