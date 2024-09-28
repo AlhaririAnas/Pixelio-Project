@@ -65,10 +65,9 @@ def run(args):
             similarities = pickle.load(f)
     except FileNotFoundError:
         similarities = defaultdict()
-        similarities[0] = None
 
     last_db_id = get_last_entry()
-    last_sim_id = max(similarities.keys())
+    last_sim_id = len(similarities.keys())
     id = min(last_sim_id, last_db_id)
 
     if id == 0:

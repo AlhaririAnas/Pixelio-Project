@@ -56,26 +56,40 @@ If neither the `-m` nor the `-s` flag are specified, it will launch the web inte
 
 To start the web-based interface, use the following command:
 ```bash
-python -m resources.main -p "../Parent_folder_of_dataset"
+python -m resources.main --color
 ```
 
-After running the command, the system will open a browser window automatically. If it doesn’t, manually click the IP address shown in the terminal output using Ctrl + click.
-This process may take some time, especially if you are performing it for the first time. This is because the pickle file is loaded and the clusters of the color histograms and the embeddings are calculated. To change the clustering methods, please refer to `resources.main.create_and_save_clustering_model`.
+Make sure that the metadata.db file is located in the Pixelio project folder. The similarities.pkl should also be located there, or you can refer to it using `--pkl_file`. \
+**The complete data set must be located in `/app/static/images`, e.g:**
+```bash
+/app/
+    /static/
+        /images/
+            /000/
+                01.jpg
+                02.jpg
+            /001/
+                03.png
+                04.png
+    /templates/
+        index.html
+    app.py
+```
 
-## Recommending Images
-To recommend images similar to one or more input images:
+In addition, `--image_count` can be used to set how many similar images are to be calculated.
+Besides `--color` (color histograms) there are `--embedding` (Inception v3 embeddings) and `--yolo` (YOLO v8 object detection) as selection of the measuring method. An example could be:
+```bash
+python -m resources.main --yolo --image_count 30
+```
+
+
+After running the command, the system will open a browser window automatically.
+This process may take some time, especially if you are performing it for the first time. This is because the pickle file loads.
+
+## Pixelio Demo
 ![Web interface](public/Web%20Interface.png)
 
-Click on "Choose files" and select the input images.
-Choose the type of similarity comparison by checking the appropriate boxes:
-
-* Color
-* Embedding
-* YOLO
-
-Select a distance measure from the dropdown menu (Euclidean, Manhattan, Cosine).
-
-Click "Upload" to start the image similarity search. The process may take a few seconds, and the results will be displayed based on the selected metrics.
+If you click on an image, a sidebar will appear on the right side containing the most similar images to this image.
 
 ## Contact
 
